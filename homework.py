@@ -1,11 +1,14 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class InfoMessage:
     """Информационное сообщение о тренировке."""
-    def __init__(self, training_type, duration, distance, speed, calories):
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+    training_type: str
+    duration: float
+    distance: float
+    speed: float
+    calories: float
 
     def get_message(self) -> str:
         return (
@@ -21,7 +24,6 @@ class Training:
 
     LEN_STEP = 0.65
     M_IN_KM = 1000
-    M_IN_H = 60
     M_IN_H = 60
 
     def __init__(self,
@@ -43,11 +45,11 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        pass
+        raise NotImplementedError("Неверно наследован метод")
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
-        training_type = self.__class__.__name__
+        training_type = type(self).__name__
         duration = self.duration
         distance = self.get_distance()
         speed = self.get_mean_speed()
@@ -62,9 +64,6 @@ class Running(Training):
     """Тренировка: бег."""
     CALORIES_MEAN_SPEED_MULTIPLIER = 18
     CALORIES_MEAN_SPEED_SHIFT = 1.79
-
-    def __init__(self, action: int, duration: float, weight: float) -> None:
-        super().__init__(action, duration, weight)
 
     def get_spent_calories(self) -> float:
         return ((
@@ -125,14 +124,17 @@ class Swimming(Training):
                 * self.CALORIES_SWIM2 * self.weight * self.duration)
 
 
-def read_package(workout_type: str, data: list) -> Training:
+def read_package(workout_type: str, data: list[tuple[str, list]]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    TRAIN_CODES = {
-        'SWM': Swimming,
-        'RUN': Running,
-        'WLK': SportsWalking}
-    training_type = TRAIN_CODES[workout_type](*data)
-    return training_type
+    try:
+        WORKOUT_TYPES: dict[str, Training] = {
+            'SWM': Swimming,
+            'RUN': Running,
+            'WLK': SportsWalking}
+        training_type = WORKOUT_TYPES[workout_type](*data)
+        return training_type
+    except KeyError:
+        raise KeyError('Неизвестный workout_type')
 
 
 def main(training: Training) -> None:
