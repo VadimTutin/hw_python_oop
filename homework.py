@@ -124,7 +124,7 @@ class Swimming(Training):
                 * self.CALORIES_SWIM2 * self.weight * self.duration)
 
 
-def read_package(workout_type: str, data: list[tuple[str, list]]) -> Training:
+def read_package(workout_type: str, data: list[int]) -> Training:
     """Прочитать данные полученные от датчиков."""
     try:
         WORKOUT_TYPES: dict[str, Training] = {
